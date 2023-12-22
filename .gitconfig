@@ -1,0 +1,44 @@
+[init]
+    defaultBranch = main
+[diff]
+    colormoved = zebra
+[pull]
+    rebase = true
+
+[alias]
+    # Add to last commit while retaining message
+    amend = commit --amend --no-edit
+
+    # Add all files and amend to last commit
+    oops = "!f(){ \
+        git add -A; \
+        if [ \"$1\" == '' ]; then \
+            git commit --amend --no-edit; \
+        else \
+            git commit --amend \"$@\"; \
+        fi; \
+    }; f"
+
+    # Add all files in working tree to a WIP commit
+    # If last commit is already WIP, append to it
+    wip = "!f(){ \
+        git add -A; \
+        if [ \"$(git show -s --format=%s)\" == \"WIP\" ]; then \
+            git commit --amend --no-edit; \
+        else \
+            git commit -m 'WIP'; \
+        fi; \
+    }; f"
+
+    # Put files from WIP commit back into working tree
+    # Abort command if working tree is not clean or last commit != WIP
+    resume = "!f(){ \
+        if [ -n \"$(git status --porcelain)\" ]; then \
+            echo \"Working tree is not clean; aborting.\"; \
+        elif [ \"$(git show -s --format=%s)\" != \"WIP\" ]; then \
+            echo \"Last commit message not 'WIP'; aborting.\"; \
+        else \
+            git reset HEAD^; \
+        fi; \
+    }; f"
+
